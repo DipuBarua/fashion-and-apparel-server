@@ -35,7 +35,7 @@ async function run() {
             res.send(result);
         })
 
-        // sigle data get fot other purposes 
+        // single data get for showing same branded products in a page.
         app.get("/fashion/:brand_name", async (req, res) => {
             const brand_name = req.params.brand_name;
             const query = { brand_name: brand_name };
@@ -51,12 +51,55 @@ async function run() {
 
         })
 
+        // get for product details 
+        app.get("/fashion/:id", async (req, res) => {
+            const id = req.params.id;
+            // console.log('the id for details:', id);
+            const query = { _id: new ObjectId(id) };
+            const result = await fashionCollection.findOne(query);
+            res.send(result);
+        })
+
+
+        // post to create a product 
         app.post('/fashion', async (req, res) => {
             const newProduct = req.body;
             console.log(newProduct);
             const result = await fashionCollection.insertOne(newProduct);
             res.send(result);
         })
+
+        //put to update product card
+        app.put('/fashion/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updatedProduct = req.body;
+            const product = {
+                $set: {
+                    name: updatedProduct.name,
+                    image: updatedProduct.image,
+                    brand_name: updatedProduct.brand_name,
+                    price: updatedProduct.price,
+                    type: updatedProduct.type,
+                    rating: updatedProduct.rating,
+                    description: updatedProduct.description,
+
+                }
+            }
+            const result = await fashionCollection.updateOne(filter, product, options);
+            res.send(result);
+        })
+
+
+        // delete a product [client side not updated...]
+        app.delete('/fashion/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await fashionCollection.deleteOne(query);
+            res.send(result);
+        })
+
 
 
         // Send a ping to confirm a successful connection
